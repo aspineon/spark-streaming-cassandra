@@ -1,7 +1,7 @@
 package com.nibado.example.sparkstream.producer;
 
 import com.nibado.example.sparkstream.tweet.Tweet;
-import com.nibado.example.sparkstream.tweet.TweetKafkaSerializer;
+import com.nibado.example.sparkstream.tweet.TweetKryoSerializer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -12,6 +12,7 @@ import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
+import twitter4j.UserMentionEntity;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,7 +38,7 @@ public class TwitterToKafka implements StatusListener {
         properties.put("linger.ms", 1);
         properties.put("buffer.memory", 33554432);
         properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        properties.put("value.serializer", TweetKafkaSerializer.class.getName());
+        properties.put("value.serializer", TweetKryoSerializer.class.getName());
 
         producer = new KafkaProducer<>(properties);
     }
@@ -55,6 +56,10 @@ public class TwitterToKafka implements StatusListener {
 
     private static List<String> hashTags(HashtagEntity[] hashTags) {
         return Arrays.asList(hashTags).stream().map(HashtagEntity::getText).collect(Collectors.toList());
+    }
+
+    private static List<String> userMentions(UserMentionEntity[] mentions) {
+        return Arrays.asList(mentions).stream().map(UserMentionEntity::getName).collect(Collectors.toList());
     }
 
     @Override

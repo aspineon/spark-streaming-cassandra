@@ -1,5 +1,7 @@
 package com.nibado.example.sparkstream.tweet;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Date;
 import java.util.List;
 
@@ -10,12 +12,19 @@ public class Tweet {
     private final String text;
     private final Date created;
     private final List<String> hashtags;
+    private final List<String> mentions;
 
-    public Tweet(String user, String text, Date created, List<String> hashtags) {
+    public Tweet(
+            @JsonProperty("user")String user,
+            @JsonProperty("text")String text,
+            @JsonProperty("created")Date created,
+            @JsonProperty("hashtags")List<String> hashtags,
+            @JsonProperty("mentions")List<String> mentions) {
         this.user = user;
         this.text = text;
         this.created = created;
         this.hashtags = unmodifiableList(hashtags);
+        this.mentions = unmodifiableList(mentions);
     }
 
     public String getUser() {
@@ -34,6 +43,10 @@ public class Tweet {
         return hashtags;
     }
 
+    public List<String> getMentions() {
+        return mentions;
+    }
+
     @Override
     public String toString() {
         return "Tweet{" +
@@ -41,52 +54,7 @@ public class Tweet {
                 ", text='" + text + '\'' +
                 ", created=" + created +
                 ", hashtags=" + hashtags +
+                ", mentions=" + mentions +
                 '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Tweet tweet = (Tweet) o;
-
-        if (!user.equals(tweet.user)) return false;
-        if (!text.equals(tweet.text)) return false;
-        if (!created.equals(tweet.created)) return false;
-        return equals(hashtags, tweet.hashtags);
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = user.hashCode();
-        result = 31 * result + text.hashCode();
-        result = 31 * result + created.hashCode();
-        result = 31 * result + hashCode(hashtags);
-        return result;
-    }
-
-    private static int hashCode(List<String> strings) {
-        int result = 1;
-
-        for(String s : strings) {
-            result = 31 * result * s.hashCode();
-        }
-
-        return result;
-    }
-
-    private static boolean equals(List<String> list1, List<String> list2) {
-        if(list1.size() != list2.size()) {
-            return false;
-        }
-        for(int i = 0;i < list1.size();i++) {
-            if(!list1.get(i).equals(list2.get(i))) {
-                return false;
-            }
-        }
-
-        return true;
     }
 }
