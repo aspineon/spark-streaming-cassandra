@@ -17,10 +17,8 @@ public class TweetKryoSerializer extends Serializer<Tweet> {
         output.writeString(tweet.getUser());
         output.writeLong(tweet.getCreated().getTime());
         output.writeString(tweet.getText());
-        output.writeVarInt(tweet.getHashtags().size(), true);
-        for(String tag : tweet.getHashtags()) {
-            output.writeString(tag);
-        }
+        writeList(output, tweet.getHashtags());
+        writeList(output, tweet.getMentions());
     }
 
     @Override
@@ -28,13 +26,25 @@ public class TweetKryoSerializer extends Serializer<Tweet> {
         String user = input.readString();
         Date created = new Date(input.readLong());
         String text = input.readString();
+
+        return new Tweet(user, text, created, readList(input), readList(input));
+    }
+
+    private static List<String> readList(Input input) {
         int size = input.readVarInt(true);
-        List<String> hashTags = new ArrayList<>(size);
+        List<String> list = new ArrayList<>(size);
 
         for(int i = 0;i < size;i++) {
-            hashTags.add(input.readString());
+            list.add(input.readString());
         }
 
-        return new Tweet(user, text, created, hashTags);
+        return list;
+    }
+
+    private static void writeList(Output output, List<String> list) {
+        output.writeVarInt(list.size(), true);
+        for(String tag : list) {
+            output.writeString(tag);
+        }
     }
 }
